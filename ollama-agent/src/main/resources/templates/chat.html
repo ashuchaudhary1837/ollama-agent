@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ollama AI Agent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f3f5f9;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            box-sizing: border-box;
+            padding: 12px;
+        }
+
+        button {
+            margin-top: 12px;
+            padding: 12px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .reply {
+            background: #eef2ff;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Ollama AI Agent</h1>
+    <p>Ask a question to your local AI assistant.</p>
+
+    <form th:action="@{/chat}" method="post">
+        <textarea name="message"
+                  th:text="${message}"
+                  placeholder="Enter your question..."
+                  required></textarea>
+
+        <button type="submit">Ask AI</button>
+    </form>
+
+    <div class="reply" th:if="${reply != null}">
+        <h3>AI Response</h3>
+        <p th:text="${reply}"></p>
+    </div>
+</div>
+</body>
+</html>

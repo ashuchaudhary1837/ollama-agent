@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ollama AI Agent</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,6 +53,11 @@
     <p>Ask a question to your local AI assistant.</p>
 
     <form th:action="@{/chat}" method="post">
+
+        <input type="hidden"
+               name="sessionId"
+               th:value="${sessionId}">
+
         <textarea name="message"
                   th:text="${message}"
                   placeholder="Enter your question..."

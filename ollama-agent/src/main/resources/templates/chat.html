@@ -3,73 +3,322 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Ollama AI Agent</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        header {
+            background: #111827;
+            color: white;
             padding: 20px;
-            background: #f3f5f9;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            color: #d1d5db;
         }
 
         .container {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 16px;
         }
 
-        textarea {
+        .panel {
+            background: white;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 21px;
+        }
+
+        .description {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 8px;
+            font-weight: bold;
+        }
+
+        input[type="file"],
+        input[type="text"] {
             width: 100%;
-            height: 90px;
-            box-sizing: border-box;
             padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            font-size: 15px;
         }
 
         button {
-            margin-top: 12px;
+            margin-top: 14px;
             padding: 12px 20px;
             background: #2563eb;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
+            font-size: 15px;
             cursor: pointer;
         }
 
-        .reply {
-            background: #eef2ff;
-            padding: 15px;
-            margin-top: 20px;
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .upload-button {
+            background: #059669;
+        }
+
+        .upload-button:hover {
+            background: #047857;
+        }
+
+        .message {
+            padding: 12px;
             border-radius: 8px;
+            margin-top: 16px;
+            overflow-wrap: anywhere;
+        }
+
+        .success {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .error {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .chat-history {
+            margin: 20px 0;
+        }
+
+        .chat-message {
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
             white-space: pre-wrap;
+        }
+
+        .user-message {
+            background: #dbeafe;
+            margin-left: 40px;
+        }
+
+        .assistant-message {
+            background: #f3f4f6;
+            margin-right: 40px;
+        }
+
+        .message-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-form input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-form button {
+            margin-top: 0;
+        }
+
+        .note {
+            margin-top: 12px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .panel {
+                padding: 16px;
+            }
+
+            .chat-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .chat-form button {
+                width: 100%;
+            }
+
+            .user-message {
+                margin-left: 10px;
+            }
+
+            .assistant-message {
+                margin-right: 10px;
+            }
         }
     </style>
 </head>
+
 <body>
-<div class="container">
+
+<header>
     <h1>Ollama AI Agent</h1>
-    <p>Ask a question to your local AI assistant.</p>
+    <p>Your local AI assistant powered by Ollama and LangChain4j</p>
+</header>
 
-    <form th:action="@{/chat}" method="post">
+<main class="container">
 
-        <input type="hidden"
-               name="sessionId"
-               th:value="${sessionId}">
+    <!-- IMAGE UPLOAD SECTION -->
+    <section class="panel">
+        <h2>Upload an Image or Document Screenshot</h2>
 
-        <textarea name="message"
-                  th:text="${message}"
-                  placeholder="Enter your question..."
-                  required></textarea>
+        <p class="description">
+            Upload a PNG or JPEG image containing text. The application
+            extracts the text using OCR and adds it to the knowledge base
+            so you can ask the AI questions about it.
+        </p>
 
-        <button type="submit">Ask AI</button>
-    </form>
+        <form th:action="@{/rag/upload-image}"
+              method="post"
+              enctype="multipart/form-data">
 
-    <div class="reply" th:if="${reply != null}">
-        <h3>AI Response</h3>
-        <p th:text="${reply}"></p>
-    </div>
-</div>
+            <label for="imageFile">Select an image</label>
+
+            <input
+                    type="file"
+                    id="imageFile"
+                    name="file"
+                    accept="image/png,image/jpeg"
+                    required
+            />
+
+            <button type="submit" class="upload-button">
+                Upload Image
+            </button>
+        </form>
+
+        <div
+                class="message success"
+                th:if="${uploadMessage != null}"
+                th:text="${uploadMessage}">
+        </div>
+
+        <div
+                class="message error"
+                th:if="${uploadError != null}"
+                th:text="${uploadError}">
+        </div>
+
+        <p class="note">
+            Supported formats: PNG and JPEG. Uploading an image extracts
+            its text; it does not automatically understand objects or
+            other visual details.
+        </p>
+    </section>
+
+    <!-- CHAT SECTION -->
+    <section class="panel">
+        <h2>Chat with Your AI Agent</h2>
+
+        <p class="description">
+            Ask general questions or ask about text from an image
+            you have uploaded.
+        </p>
+
+        <!-- Existing conversation, if the controller supplies these attributes -->
+        <div class="chat-history">
+
+            <div
+                    class="chat-message user-message"
+                    th:if="${userMessage != null and !#strings.isEmpty(userMessage)}">
+
+                <span class="message-label">You</span>
+
+                <span th:text="${userMessage}"></span>
+            </div>
+
+            <div
+                    class="chat-message assistant-message"
+                    th:if="${reply != null and !#strings.isEmpty(reply)}">
+
+                <span class="message-label">AI Assistant</span>
+
+                <span th:text="${reply}"></span>
+            </div>
+
+        </div>
+
+        <!-- This form submits to ChatPageController -->
+        <form th:action="@{/chat}" method="post" class="chat-form">
+
+            <input
+                    type="text"
+                    name="message"
+                    placeholder="Ask me anything..."
+                    autocomplete="off"
+                    required
+            />
+
+            <button type="submit">Send Message</button>
+
+        </form>
+
+        <p class="note">
+            Your assistant can use its configured tools and retrieved
+            document context when answering questions.
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    Local AI Agent · Spring Boot · Thymeleaf · Ollama · LangChain4j
+</footer>
+
 </body>
 </html>
